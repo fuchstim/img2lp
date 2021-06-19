@@ -34,7 +34,6 @@ class Vertex {
     context.closePath();
 
     context.fill();
-
   }
 }
 

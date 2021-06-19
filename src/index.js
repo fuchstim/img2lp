@@ -1,48 +1,66 @@
+#!/usr/bin/env node
+
 const fs = require('fs');
-const { createCanvas, loadImage } = require('canvas');
+const Jimp = require('jimp');
+const { createCanvas } = require('canvas');
+const path = require('path');
 
 const utils = require('./utils');
 
 async function run() {
-  utils.log.info('Loading image...');
-  const inputImage = await loadImage('./input.png');
+  const { pointsDensity, colourRadius, inputPath, outputPath, outputFormat } = utils.cli.parseOptions();
 
-  const { width, height } = inputImage;
+  utils.log.info('Loading image…');
+  const inputImage = await Jimp.read(path.resolve(inputPath));
 
-  utils.log.info('Generating points...');
-  const points = utils.points.generatePoints({ width, height, densityPercent: 1.5 });
-  utils.log.info('Generating vertices...');
+  const { width, height } = inputImage.bitmap;
+
+  utils.log.info('Generating points…');
+  const points = utils.points.generatePoints({ width, height, densityPercent: pointsDensity });
+
+  utils.log.info('Generating vertices…');
   const vertices = utils.vertices.getVertices({ points });
 
-  const canvasWidth = points.pop().pop().x;
-  const canvasHeight = points.pop().pop().y;
-
-  const canvas = createCanvas(canvasWidth, canvasHeight);
+  const canvas = createCanvas(width, height);
   const context = canvas.getContext('2d');
 
-  context.drawImage(inputImage, 0, 0, canvasWidth, canvasHeight);
+  utils.log.info('Drawing vertices…');
 
-  utils.log.info('Parsing pixel data...');
-  const pixelData = utils.pixels.getPixelData(context.getImageData(0, 0, canvasWidth, canvasHeight));
-  utils.log.info('Drawing vertices...');
+  let lastProgress;
   vertices.forEach((vertex, index) => {
     const midpoint = vertex.midpoint;
-    vertex.fillColour = pixelData.getAverageColourAroundPoint({ point: midpoint });
+    vertex.fillColour = utils.pixels.getAverageColourAroundPoint({ point: midpoint, image: inputImage, radius: colourRadius });
 
     vertex.draw(context);
 
     const progress = Math.ceil((index * 100) / vertices.length);
-    if (progress % 10 === 0) {
-      utils.log.info(`Drawing vertices... (${progress}% done)`);
+
+    if (progress % 5 == 0 && progress != lastProgress) {
+      lastProgress = progress;
+      process.stdout.cursorTo(0);
+      process.stdout.write(`[info] Progress: ${progress}%`);
     }
   });
 
-  utils.log.info('Writing file...');
-  const buffer = canvas.toBuffer('image/png');
-  fs.writeFileSync('./output.png', buffer);
+  process.stdout.write('\n');
 
-  const svg = utils.svg.verticesToSvg({ vertices, width: canvasWidth, height: canvasHeight });
-  fs.writeFileSync('output.svg', svg);
+  const fullOutputPath = path.resolve(`${outputPath}.${outputFormat}`);
+  utils.log.info(`Writing file ${fullOutputPath}…`);
+  if (outputFormat === 'svg') {
+    const svg = utils.svg.verticesToSvg({ vertices, width, height });
+    fs.writeFileSync(fullOutputPath, svg);
+  } else {
+    const buffer = canvas.toBuffer('image/png');
+
+    if (outputFormat === 'png') {
+      fs.writeFileSync(fullOutputPath, buffer);
+    } else {
+      const outputImage = await Jimp.read(buffer);
+      await outputImage.writeAsync(fullOutputPath);
+    }
+  }
+
+  process.exit(0);
 }
 
 run();

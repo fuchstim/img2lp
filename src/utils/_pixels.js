@@ -1,21 +1,41 @@
+const Jimp = require('jimp');
+
 const Colour = require('../class/Colour');
-const PixelData = require('../class/PixelData');
 
-function getPixelData(imageData) {
-  const pixels = [];
-  for (let y = 0; y < imageData.height; y ++) {
-    pixels[y] = [];
-    for (let x = 0; x < imageData.width; x ++) {
-      const index = (y * imageData.width) + x;
-      const [ r, g, b ] = imageData.data.slice(index * 4, (index * 4) + 4);
+function getAverageColourAroundPoint({ point, image, radius = 30 }) {
+  const colours = [];
 
-      pixels[y][x] = { colour: Colour.create({ r, g, b }) };
+  const { width, height } = image.bitmap;
+
+  for (let indexY = 0; indexY < radius; indexY ++) {
+    for (let indexX = 0; indexX < radius; indexX ++) {
+      const x = (point.x - (radius / 2)) + indexX;
+      const y = (point.y - (radius / 2)) + indexY;
+
+      if (y < 0 || y >= height) { continue; }
+      if (x < 0 || x >= width) { continue; }
+
+      const colour = Jimp.intToRGBA(image.getPixelColor(x, y));
+
+      colours.push(Colour.create(colour));
     }
   }
 
-  return PixelData.create({ pixels });
+  if (!colours.length) { return new Colour(); }
+
+  return Colour.create({
+    r: _calculateAverage(colours.map(({ r }) => r)),
+    g: _calculateAverage(colours.map(({ g }) => g)),
+    b: _calculateAverage(colours.map(({ b }) => b)),
+  });
+}
+
+function _calculateAverage(values) {
+  const sum = values.reduce((acc, value) => acc + (value**2), 0);
+
+  return Math.sqrt(sum / values.length);
 }
 
 module.exports = {
-  getPixelData,
+  getAverageColourAroundPoint,
 };

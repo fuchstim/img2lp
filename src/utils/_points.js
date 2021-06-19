@@ -13,18 +13,18 @@ function generatePoints({ width, height, densityPercent = 1.5 }) {
 
   const points = [];
 
-  for (let indexY = 0; indexY < countH; indexY ++) {
-    points[indexY] = [];
-    points[indexY].push(Point.create({ x: 0, y: getRandomValueBetween(indexY - 0.5, indexY + 0.5) * dist }));
+  for (let rowIndex = 0; rowIndex < countH; rowIndex ++) {
+    points[rowIndex] = [];
+    points[rowIndex].push(Point.create({ x: 0, y: getRandomValueBetween(rowIndex - 0.5, rowIndex + 0.5) * dist }));
 
-    for (let indexX = 0; indexX < countW; indexX ++) {
-      const x = getRandomValueBetween(indexX - 0.5, indexX + 0.5) * dist;
-      const y = getRandomValueBetween(indexY - 0.5, indexY + 0.5) * dist;
+    for (let colIndex = 0; colIndex < countW; colIndex ++) {
+      const x = getRandomValueBetween(colIndex - 0.5, colIndex + 0.5) * dist;
+      const y = getRandomValueBetween(rowIndex - 0.5, rowIndex + 0.5) * dist;
 
-      points[indexY].push(Point.create({ x, y }));
+      points[rowIndex].push(Point.create({ x, y }));
     }
 
-    points[indexY].push(Point.create({ x: width, y: getRandomValueBetween(indexY - 0.5, indexY + 0.5) * dist }));
+    points[rowIndex].push(Point.create({ x: width, y: getRandomValueBetween(rowIndex - 0.5, rowIndex + 0.5) * dist }));
   }
 
   const firstRow = [
@@ -39,7 +39,7 @@ function generatePoints({ width, height, densityPercent = 1.5 }) {
     Point.create({ x: 0, y: height }),
     ...Array(countW)
       .fill()
-      .map((_, index) => Point.create({ x: getRandomValueBetween(index - 0.5, index + 0.5) * dist, y: countH * dist })),
+      .map((_, index) => Point.create({ x: getRandomValueBetween(index - 0.5, index + 0.5) * dist, y: height })),
     Point.create({ x: width, y: height }),
   ];
 
@@ -58,6 +58,7 @@ function generatePoints({ width, height, densityPercent = 1.5 }) {
 
     return row;
   });
+
 }
 
 module.exports = {

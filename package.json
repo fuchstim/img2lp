@@ -1,24 +1,34 @@
 {
   "name": "img2lp",
+  "description": "A simple command line tool to generate low-poly art from images.",
   "version": "1.0.0",
-  "description": "",
+  "author": "Tim Fuchs <dev@ftim.eu>",
   "main": "src/index.js",
-  "scripts": {
-    "start": "node src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "bin": {
+    "img2lp": "./src/index.js"
   },
+  "keywords": [
+    "lowpoly",
+    "graphic",
+    "graphics",
+    "image",
+    "images",
+    "vector",
+    "svg"
+  ],
+  "homepage": "https://github.com/fuchstim/img2lp",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fuchstim/img2lp.git"
   },
-  "author": "",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/fuchstim/img2lp/issues"
   },
-  "homepage": "https://github.com/fuchstim/img2lp#readme",
   "dependencies": {
     "canvas": "^2.8.0",
-    "eslint": "^7.28.0"
+    "eslint": "^7.28.0",
+    "jimp": "^0.16.1",
+    "yargs": "^17.0.1"
   }
 }
