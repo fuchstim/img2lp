@@ -1,7 +1,7 @@
 {
   "name": "img2lp",
   "description": "A simple command line tool to generate low-poly art from images.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Tim Fuchs <dev@ftim.eu>",
   "main": "src/index.js",
   "bin": {
